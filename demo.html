@@ -1,0 +1,20 @@
+<!doctype html><html lang="en"><meta charset="utf-8">
+<title>Bereel oEmbed Demo</title>
+<style>
+ body{font-family:sans-serif;max-width:480px;margin:3rem auto}
+ input,button{padding:.6rem;width:100%;margin:.4rem 0}
+ pre{white-space:pre-wrap;border:1px solid #ccc;padding:1rem}
+</style>
+<h2>Bereel oEmbed Test</h2>
+<input id="url" placeholder="Paste public Instagram Reel URL">
+<button onclick="run()">Fetch embed</button>
+<pre id="out"></pre>
+<script>
+async function run(){
+  const u=document.getElementById('url').value.trim();
+  if(!u)return;
+  const r=await fetch('https://api.bereel.space/api/oembed?url='+encodeURIComponent(u));
+  document.getElementById('out').textContent=await r.text();
+}
+</script>
+</html>
