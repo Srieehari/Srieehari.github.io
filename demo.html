@@ -2,19 +2,23 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>Bereel oEmbed Demo</title>
+  <title>Bereel oEmbed Demo</title>
   <style>
-    body { font-family:sans-serif; max-width:480px; margin:3rem auto; }
-    input,button { padding:.6rem; width:100%; margin:.4rem 0; }
-    pre { white-space:pre-wrap; border:1px solid #ccc; padding:1rem; }
+    body { font-family:sans-serif; max-width:520px; margin:3rem auto; line-height:1.4 }
+    input,button { padding:.6rem; width:100%; margin:.4rem 0 }
+    pre { white-space:pre-wrap; border:1px solid #ccc; padding:1rem; background:#fafafa }
+    .thumb { text-align:center; margin:1rem 0 }
+    .thumb img { max-width:100%; border-radius:6px; box-shadow:0 0 8px rgba(0,0,0,.15) }
+    .error { color:#b00 }
   </style>
 </head>
 <body>
   <h2>Bereel oEmbed Test</h2>
 
-  <input id="url" placeholder="Paste public Instagram Reel URL" />
+  <input id="url" placeholder="Paste public Instagram (or Facebook) URL" />
   <button onclick="run()">Fetch embed</button>
 
+  <div id="result" class="thumb"></div>
   <pre id="out"></pre>
 
   <script>
@@ -22,13 +26,37 @@
       const u = document.getElementById('url').value.trim();
       if (!u) return;
 
-      /* ——— Call the Vercel serverless endpoint ——— */
-      const endpoint = 'https://bereel-api.vercel.app/api/oembed?url=' +
-                       encodeURIComponent(u);
+      const endpoint =
+        'https://bereel-api.vercel.app/api/oembed?url=' + encodeURIComponent(u);
+
+      document.getElementById('out').textContent = 'Loading…';
+      document.getElementById('result').innerHTML = '';
 
       try {
         const resp = await fetch(endpoint);
-        document.getElementById('out').textContent = await resp.text();
+        const text = await resp.text();
+        document.getElementById('out').textContent = text;
+
+        // Try to parse JSON for thumbnail
+        let data;
+        try { data = JSON.parse(text); } catch { /* code‑10 is plain text */ }
+
+        if (data && data.thumbnail_url) {
+          // Render clickable thumbnail
+          const a = document.createElement('a');
+          a.href = u;
+          a.target = '_blank';
+          const img = document.createElement('img');
+          img.src = data.thumbnail_url;
+          img.alt = 'Thumbnail';
+          a.appendChild(img);
+          document.getElementById('result').appendChild(a);
+        } else {
+          // show reason if code‑10 or other error
+          document.getElementById('result').innerHTML =
+            '<p class="error">No thumbnail (likely because oEmbed_Read is not yet approved).</p>';
+        }
+
       } catch (err) {
         document.getElementById('out').textContent = 'Fetch error: ' + err;
       }
