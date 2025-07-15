@@ -2,12 +2,11 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>Bereel oEmbed Demo</title>
+  <title>Bereel oEmbed Demo</title>
   <style>
-    body { font-family:sans-serif; max-width:520px; margin:3rem auto; line-height:1.4 }
+    body  { font-family:sans-serif; max-width:520px; margin:3rem auto; line-height:1.4 }
     input,button { padding:.6rem; width:100%; margin:.4rem 0 }
-    pre { white-space:pre-wrap; border:1px solid #ccc; padding:1rem; background:#fafafa }
-    .thumb { text-align:center; margin:1rem 0 }
+    pre   { white-space:pre-wrap; border:1px solid #ccc; padding:1rem; background:#fafafa }
     .thumb img { max-width:100%; border-radius:6px; box-shadow:0 0 8px rgba(0,0,0,.15) }
     .error { color:#b00 }
   </style>
@@ -15,11 +14,20 @@
 <body>
   <h2>Bereel oEmbed Test</h2>
 
+  <!-- Pre‑filled public Reel URL -->
   <input id="url"
          value="https://www.instagram.com/reel/DL5fMsJSfcB/?igsh=MW1naGZ3MW1yanA4MQ=="
          placeholder="Paste public Instagram Reel URL" />
   <button onclick="run()">Fetch embed</button>
 
+  <!-- Static custom thumbnail that links to the Reel -->
+  <div class="thumb">
+    <a href="https://www.instagram.com/reel/DL5fMsJSfcB/?igsh=MW1naGZ3MW1yanA4MQ==" target="_blank">
+      <img src="https://bereel.space/assets/custom-thumb.png" alt="Custom thumbnail">
+    </a>
+  </div>
+
+  <!-- Live oEmbed response / thumbnail (after approval) -->
   <div id="result" class="thumb"></div>
   <pre id="out"></pre>
 
@@ -39,23 +47,23 @@
         const text = await resp.text();
         document.getElementById('out').textContent = text;
 
+        // Parse JSON to display Meta thumbnail after approval
         let data;
-        try { data = JSON.parse(text); } catch { /* error JSON is plain text */ }
+        try { data = JSON.parse(text); } catch { /* code‑10 text */ }
 
         if (data && data.thumbnail_url) {
-          const a = document.createElement('a');
-          a.href = u;
-          a.target = '_blank';
+          const a   = document.createElement('a');
+          a.href    = u;
+          a.target  = '_blank';
           const img = document.createElement('img');
-          img.src = data.thumbnail_url;
-          img.alt = 'Thumbnail';
+          img.src   = data.thumbnail_url;
+          img.alt   = 'oEmbed thumbnail';
           a.appendChild(img);
           document.getElementById('result').appendChild(a);
         } else {
           document.getElementById('result').innerHTML =
-            '<p class="error">No thumbnail (oEmbed_Read not yet approved).</p>';
+            '<p class="error">No Meta thumbnail (oEmbed_Read not yet approved).</p>';
         }
-
       } catch (err) {
         document.getElementById('out').textContent = 'Fetch error: ' + err;
       }
