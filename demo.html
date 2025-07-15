@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>Bereel oEmbed Demo</title>
+  <title>Bereel oEmbed Demo</title>
   <style>
     body  { font-family:sans-serif; max-width:520px; margin:3rem auto; line-height:1.4 }
     input,button { padding:.6rem; width:100%; margin:.4rem 0 }
@@ -14,24 +14,20 @@
 <body>
   <h2>Bereel oEmbed Test</h2>
 
-  <!-- Pre‑filled public Reel URL -->
+  <!-- Pre‑filled public post URL -->
   <input id="url"
-         value="https://www.instagram.com/reel/DL5fMsJSfcB/?igsh=MW1naGZ3MW1yanA4MQ=="
-         placeholder="Paste public Instagram Reel URL" />
+         value="https://www.instagram.com/p/C5SSxHfr29J/"
+         placeholder="Paste public Instagram URL" />
   <button onclick="run()">Fetch embed</button>
 
-  <!-- Static custom thumbnail that links to the Reel -->
-  <div class="thumb">
-    <a href="https://www.instagram.com/reel/DL5fMsJSfcB/?igsh=MW1naGZ3MW1yanA4MQ==" target="_blank">
-      <img src="https://bereel.space/assets/custom-thumb.png.png" alt="Custom thumbnail">
-    </a>
-  </div>
-
-  <!-- Live oEmbed response / thumbnail (after approval) -->
+  <!-- Dynamic results -->
   <div id="result" class="thumb"></div>
   <pre id="out"></pre>
 
   <script>
+    // fallback image that lives in your repo
+    const fallbackThumb = 'https://bereel.space/assets/custom-thumb.png';
+
     async function run () {
       const u = document.getElementById('url').value.trim();
       if (!u) return;
@@ -47,23 +43,22 @@
         const text = await resp.text();
         document.getElementById('out').textContent = text;
 
-        // Parse JSON to display Meta thumbnail after approval
-        let data;
-        try { data = JSON.parse(text); } catch { /* code‑10 text */ }
+        let thumb = fallbackThumb;                 // default
+        try {
+          const data = JSON.parse(text);           // may throw before approval
+          if (data.thumbnail_url) thumb = data.thumbnail_url;
+        } catch {/* ignore parse error when code 10 text */}
 
-        if (data && data.thumbnail_url) {
-          const a   = document.createElement('a');
-          a.href    = u;
-          a.target  = '_blank';
-          const img = document.createElement('img');
-          img.src   = data.thumbnail_url;
-          img.alt   = 'oEmbed thumbnail';
-          a.appendChild(img);
-          document.getElementById('result').appendChild(a);
-        } else {
-          document.getElementById('result').innerHTML =
-            '<p class="error">No Meta thumbnail (oEmbed_Read not yet approved).</p>';
-        }
+        // Insert clickable thumbnail (always after click)
+        const a   = document.createElement('a');
+        a.href    = u;
+        a.target  = '_blank';
+        const img = document.createElement('img');
+        img.src   = thumb;
+        img.alt   = 'Thumbnail';
+        a.appendChild(img);
+        document.getElementById('result').appendChild(a);
+
       } catch (err) {
         document.getElementById('out').textContent = 'Fetch error: ' + err;
       }
