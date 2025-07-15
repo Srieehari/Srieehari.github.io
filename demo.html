@@ -15,7 +15,9 @@
 <body>
   <h2>Bereel oEmbed Test</h2>
 
-  <input id="url" placeholder="Paste public Instagram (or Facebook) URL" />
+  <input id="url"
+         value="https://www.instagram.com/reel/DL5fMsJSfcB/?igsh=MW1naGZ3MW1yanA4MQ=="
+         placeholder="Paste public Instagram Reel URL" />
   <button onclick="run()">Fetch embed</button>
 
   <div id="result" class="thumb"></div>
@@ -37,12 +39,10 @@
         const text = await resp.text();
         document.getElementById('out').textContent = text;
 
-        // Try to parse JSON for thumbnail
         let data;
-        try { data = JSON.parse(text); } catch { /* code‑10 is plain text */ }
+        try { data = JSON.parse(text); } catch { /* error JSON is plain text */ }
 
         if (data && data.thumbnail_url) {
-          // Render clickable thumbnail
           const a = document.createElement('a');
           a.href = u;
           a.target = '_blank';
@@ -52,9 +52,8 @@
           a.appendChild(img);
           document.getElementById('result').appendChild(a);
         } else {
-          // show reason if code‑10 or other error
           document.getElementById('result').innerHTML =
-            '<p class="error">No thumbnail (likely because oEmbed_Read is not yet approved).</p>';
+            '<p class="error">No thumbnail (oEmbed_Read not yet approved).</p>';
         }
 
       } catch (err) {
